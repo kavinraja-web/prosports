@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pro Sports League | Registration Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    @keyframes ticker {
+      0% {
+        transform: translateX(100%)
+      }
+
+      100% {
+        transform: translateX(-100%)
+      }
+    }
+
+    .ticker-text {
+      display: inline-block;
+      white-space: nowrap;
+      animation: ticker 25s linear infinite;
+    }
+
+    @keyframes heroScroll {
+      0% {
+        transform: translateX(0)
+      }
+
+      100% {
+        transform: translateX(-50%)
+      }
+    }
+
+    .hero-moving-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      width: 400%;
+      height: 100%;
+      animation: heroScroll 30s linear infinite;
+      z-index: 0;
+    }
+
+    .hero-moving-container img {
+      width: 12.5%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.4) contrast(1.1);
+    }
+
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.6) 100%);
+      z-index: 1;
+    }
+
+    .sport-card:hover img {
+      transform: scale(1.1);
+    }
+
+    @keyframes scrollBackground {
+      0% {
+        transform: translateX(0)
+      }
+
+      100% {
+        transform: translateX(-50%)
+      }
+    }
+
+    .moving-bg-container {
+      display: flex;
+      width: 200%;
+      animation: scrollBackground 40s linear infinite;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.08;
+      filter: grayscale(100%);
+      pointer-events: none;
+    }
+
+    .moving-bg-container img {
+      width: 25%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .relative-section {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .event-card {
+      transition: all 0.3s ease;
+    }
+
+    .event-card:hover {
+      transform: translateY(-3px);
+    }
+
+    /* Modal scroll */
+    .modal-body {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .modal-body::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .modal-body::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+      background: #1e3a8a;
+      border-radius: 4px;
+    }
+
+    /* Chatbase Chatbot Custom Styling */
+    #chatbase-bubble-window {
+      border: 4px solid #1e3a8a !important;
+      /* Website Blue Border */
+      border-radius: 20px !important;
+      box-shadow: 0 10px 40px rgba(30, 58, 138, 0.3) !important;
+    }
+
+    #chatbase-bubble-button {
+      background-color: #eab308 !important;
+      /* Website Yellow Bubble */
+      border: 2px solid #1e3a8a !important;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .animate-slideIn {
+      animation: slideIn 0.3s ease-out forwards;
+    }
+  </style>
+</head>
+
+<body class="bg-white font-sans overflow-x-hidden">
+
+  <!-- Ticker -->
+  <div class="bg-yellow-500 text-black py-2 overflow-hidden border-b-2 border-black">
+    <div class="ticker-text font-bold uppercase tracking-widest">
+      🏆 National Championship registrations are now OPEN! • Register as an Official for the upcoming Kabaddi League •
+      Cricket Trials starting next Monday • Last date for Athlete enrollment: 30th March! 🏆
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <nav class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="javascript:void(0)" onclick="showHomePage()"
+        class="text-3xl font-black text-blue-900 italic hover:scale-105 transition-transform">PRO<span
+          class="text-yellow-600">SPORTS</span></a>
+      <div class="hidden md:flex space-x-8 font-bold text-gray-700 items-center">
+        <a href="#" onclick="openPublicEvents('all')" class="hover:text-yellow-600">Events</a>
+        <a href="#" onclick="openUserDashboard()" class="hover:text-yellow-600">Dashboard</a>
+        <div id="navAuthSection">
+          <div id="loggedOutButtons" class="flex shadow-sm rounded-full overflow-hidden border border-blue-900/20">
+            <button onclick="openDirectLogin('Athlete')"
+              class="bg-blue-900 text-white px-6 py-2 hover:bg-blue-800 transition-all font-bold">Athlete Login</button>
+            <button onclick="openDirectLogin('Official')"
+              class="bg-yellow-500 text-blue-900 px-6 py-2 hover:bg-yellow-400 transition-all font-bold border-l border-blue-900/30">Official
+              Login</button>
+          </div>
+          <div id="loggedInProfile" class="hidden relative group">
+            <div
+              class="w-12 h-12 bg-blue-900 border-2 border-yellow-500 rounded-full flex items-center justify-center cursor-pointer text-white font-black text-xl hover:scale-105 transition-all shadow-md">
+              <span id="userInitialLetter">?</span>
+            </div>
+            <div class="absolute right-0 top-full pt-2 w-56 hidden group-hover:block z-50">
+              <div class="bg-white border shadow-xl rounded-xl overflow-hidden">
+                <div class="px-4 py-3 border-b bg-gray-50">
+                  <p id="navUserName" class="text-xs font-black text-blue-900 uppercase">Name</p>
+                  <p id="navUserRole" class="text-xs text-gray-400 font-bold"></p>
+                </div>
+                <button onclick="handleLogout()"
+                  class="w-full text-left px-4 py-3 text-red-600 font-bold hover:bg-red-50 flex items-center transition-colors">
+                  <i class="fas fa-sign-out-alt mr-3"></i> Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button onclick="toggleMobileMenu()" id="mobileMenuBtn"
+        class="md:hidden text-blue-900 p-2 text-2xl focus:outline-none transition-transform active:scale-95">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenuOverlay"
+      class="hidden fixed inset-0 bg-blue-900/95 backdrop-blur-xl z-[100] flex flex-col p-10 animate-slideIn">
+      <div class="flex justify-between items-center mb-12">
+        <div class="text-2xl font-black italic text-white">PRO<span class="text-yellow-500">SPORTS</span></div>
+        <button onclick="toggleMobileMenu()" class="text-white text-3xl focus:outline-none">&times;</button>
+      </div>
+
+      <div class="flex flex-col space-y-8 text-center">
+        <a href="#" onclick="toggleMobileMenu(); openPublicEvents('all')"
+          class="text-2xl font-black text-white hover:text-yellow-500 transition-colors uppercase italic tracking-tighter">Events</a>
+        <a href="#" onclick="toggleMobileMenu(); openUserDashboard()"
+          class="text-2xl font-black text-white hover:text-yellow-500 transition-colors uppercase italic tracking-tighter">Dashboard</a>
+
+        <div class="h-px bg-white/10 my-4 w-full mx-auto"></div>
+
+        <div id="mobileLoggedOut" class="flex flex-col gap-4">
+          <button onclick="toggleMobileMenu(); openDirectLogin('Athlete')"
+            class="bg-white text-blue-900 py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl hover:bg-yellow-500 hover:text-blue-900 transition-all">Athlete
+            Login</button>
+          <button onclick="toggleMobileMenu(); openDirectLogin('Official')"
+            class="bg-yellow-500 text-blue-900 py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl hover:bg-white transition-all">Official
+            Login</button>
+        </div>
+
+        <div id="mobileLoggedIn" class="hidden flex flex-col items-center gap-6">
+          <div
+            class="w-20 h-20 bg-yellow-500 border-4 border-white/20 rounded-full flex items-center justify-center text-blue-900 text-3xl font-black shadow-2xl">
+            <span id="mobileUserInitialLetter">?</span>
+          </div>
+          <div>
+            <h4 id="mobileNavUserName" class="text-white text-2xl font-black uppercase tracking-tight text-center">Name
+            </h4>
+            <p id="mobileNavUserRole"
+              class="text-yellow-500 font-black uppercase text-xs tracking-widest mt-1 text-center">Role</p>
+          </div>
+          <button onclick="toggleMobileMenu(); handleLogout()"
+            class="w-full bg-red-600/20 text-red-500 py-4 rounded-2xl font-black uppercase tracking-widest text-sm border border-red-500/30 hover:bg-red-600 hover:text-white transition-all">Logout
+            Account</button>
+        </div>
+      </div>
+
+      <div class="mt-auto text-center">
+        <p class="text-white/30 text-[10px] font-black uppercase tracking-[5px]">Rise to the Challenge</p>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="relative h-[600px] flex items-center justify-center text-center text-white overflow-hidden">
+    <div class="hero-moving-container">
+      <img src="./assets/cricket.png" alt="cricket" />
+      <img src="./assets/image.png" alt="kabaddi" />
+      <img src="./assets/football.png" alt="football" />
+      <img src="./assets/athletics.png" alt="athletics" />
+      <img src="./assets/cricket.png" alt="cricket" />
+      <img src="./assets/football.png" alt="football" />
+      <img src="./assets/image.png" alt="kabaddi" />
+      <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1000&q=80"
+        alt="athletics" />
+    </div>
+    <div class="hero-overlay"></div>
+    <div class="z-20 px-4">
+      <h1 class="text-6xl md:text-8xl font-black mb-4 uppercase italic tracking-tighter drop-shadow-2xl">Rise to the
+        Challenge</h1>
+      <p class="text-xl md:text-2xl mb-10 font-bold tracking-widest uppercase text-yellow-500 drop-shadow-md">Elite
+        Performance. Professional Standards.</p>
+      <div class="flex flex-col md:flex-row justify-center gap-6">
+        <a href="#" onclick="handleHeroButtonClick('Marathon')"
+          class="bg-yellow-500 text-blue-900 text-xl px-12 py-5 rounded-lg font-black hover:bg-white hover:scale-105 transition-all transform flex items-center justify-center">
+          <i class="fas fa-running mr-3"></i> MARATHON
+        </a>
+        <a href="#" onclick="handleHeroButtonClick('Sports')"
+          class="bg-yellow-500 text-blue-900 text-xl px-12 py-5 rounded-lg font-black hover:bg-white hover:text-blue-900 hover:scale-105 transition-all transform flex items-center justify-center">
+          <i class="fas fa-basketball mr-3"></i> SPORTS
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════
+     OFFICIAL DASHBOARD
+════════════════════════════════════════ -->
+  <div id="officialDashboard" class="hidden min-h-screen bg-gray-50 py-12 px-6">
+    <div class="container mx-auto">
+      <!-- Profile Banner -->
+      <div
+        class="flex flex-col md:flex-row items-center justify-between mb-10 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+        <div class="flex items-center space-x-6">
+          <div
+            class="w-24 h-24 bg-yellow-500 border-4 border-blue-900 rounded-full flex items-center justify-center text-blue-900 text-4xl font-black shadow-lg">
+            <span id="offUserInitial">?</span>
+          </div>
+          <div>
+            <h1 id="offUserName" class="text-3xl font-black text-blue-900 uppercase italic">Official</h1>
+            <p class="text-yellow-600 font-black uppercase tracking-widest text-sm flex items-center gap-2">
+              <i class="fas fa-clipboard-check"></i> Certified Official
+            </p>
+          </div>
+        </div>
+        <div id="dynamicPostBtnContainer" class="flex flex-col sm:flex-row gap-4 mt-6 md:mt-0">
+          <button id="dynamicPostBtn" onclick="openCreateEventModal('Sports')"
+            class="bg-blue-900 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-yellow-500 hover:text-blue-900 transition-all shadow-lg flex items-center justify-center gap-3">
+            <i id="dynamicPostIcon" class="fas fa-basketball text-xl"></i> <span id="dynamicPostText">Post Sport</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- My Events -->
+      <div class="flex items-center justify-between mb-6">
+        <h2 id="officialDashTitle" class="text-2xl font-black text-blue-900 uppercase italic tracking-tighter">My Events
+        </h2>
+        <span id="offEventCount" class="bg-blue-900 text-white text-xs font-black px-4 py-1 rounded-full">0
+          Events</span>
+      </div>
+
+      <div id="offEventsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Populated by JS -->
+      </div>
+      <div id="offNoEvents" class="hidden py-20 text-center">
+        <div class="text-6xl mb-4">📋</div>
+        <p class="text-2xl font-black text-gray-300 uppercase italic">No events yet</p>
+        <p class="text-gray-400 mt-2">Click "Create New Event" to post your first event.</p>
+      </div>
+
+      <div class="mt-12 text-center">
+        <button onclick="window.location.reload()"
+          class="text-blue-900 font-bold uppercase tracking-widest hover:text-yellow-500 transition-colors">&#8592; Back
+          to Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+     ATHLETE DASHBOARD
+════════════════════════════════════════ -->
+  <div id="sportsDashboard" class="hidden min-h-screen bg-gray-50 py-12 px-6">
+    <div class="container mx-auto">
+      <div id="athleteProfileBanner"
+        class="flex flex-col md:flex-row items-center justify-between mb-12 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+        <div class="flex items-center space-x-6">
+          <div
+            class="w-24 h-24 bg-blue-900 border-4 border-yellow-500 rounded-full flex items-center justify-center text-white text-4xl font-black shadow-lg">
+            <span id="dashUserInitial">?</span>
+          </div>
+          <div>
+            <h1 id="dashUserName" class="text-3xl font-black text-blue-900 uppercase italic">Athlete</h1>
+            <p class="text-gray-400 font-bold uppercase tracking-widest text-sm">Pro Sports Athlete</p>
+          </div>
+        </div>
+        <div class="mt-6 md:mt-0 relative group">
+          <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input type="text" id="dashSearch" placeholder="Search sports..."
+            class="pl-12 pr-4 py-3 bg-gray-100 rounded-full outline-none w-64 focus:w-80 focus:bg-white focus:ring-2 focus:ring-blue-900 transition-all duration-300 font-bold text-sm" />
+        </div>
+      </div>
+
+      <h2 class="text-2xl font-black text-blue-900 mb-8 uppercase italic tracking-tighter">My Registrations</h2>
+      <div id="myRegistrationsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+        <div
+          class="col-span-full py-10 text-center text-gray-400 font-bold bg-white rounded-2xl border-2 border-dashed">
+          <p>No registrations found. Register for an event to see it here!</p>
+        </div>
+      </div>
+
+      <h2 class="text-2xl font-black text-blue-900 mb-8 uppercase italic tracking-tighter">Browse Events by Discipline
+      </h2>
+
+      <!-- Sport Image Filters -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div onclick="loadEventsByTag('Cricket')"
+          class="sport-card bg-white rounded-2xl overflow-hidden group cursor-pointer border border-gray-200 shadow-md hover:shadow-2xl hover:border-yellow-500 transition duration-500">
+          <div class="h-40 md:h-56 overflow-hidden"><img src="./assets/cricket.png" alt="Cricket"
+              class="w-full h-full object-cover transition duration-700" /></div>
+          <div class="p-4 md:p-8 text-center bg-white">
+            <h3 class="text-xl md:text-2xl font-black text-blue-900 italic group-hover:text-yellow-600 transition">CRICKET</h3>
+          </div>
+        </div>
+        <div onclick="loadEventsByTag('Kabaddi')"
+          class="sport-card bg-white rounded-2xl overflow-hidden group cursor-pointer border border-gray-200 shadow-md hover:shadow-2xl hover:border-yellow-500 transition duration-500">
+          <div class="h-40 md:h-56 overflow-hidden"><img src="./assets/image.png" alt="Kabaddi"
+              class="w-full h-full object-cover transition duration-700" /></div>
+          <div class="p-4 md:p-8 text-center bg-white">
+            <h3 class="text-xl md:text-2xl font-black text-blue-900 italic group-hover:text-yellow-600 transition">KABADDI</h3>
+          </div>
+        </div>
+        <div onclick="loadEventsByTag('Football')"
+          class="sport-card bg-white rounded-2xl overflow-hidden group cursor-pointer border border-gray-200 shadow-md hover:shadow-2xl hover:border-yellow-500 transition duration-500">
+          <div class="h-40 md:h-56 overflow-hidden"><img src="./assets/ronaldo.png" alt="Football"
+              class="w-full h-full object-cover transition duration-700" /></div>
+          <div class="p-4 md:p-8 text-center bg-white">
+            <h3 class="text-xl md:text-2xl font-black text-blue-900 italic group-hover:text-yellow-600 transition">FOOTBALL</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sport filter tabs -->
+      <div class="flex flex-wrap gap-3 mb-8" id="sportFilterTabs">
+        <button onclick="loadEventsByTag('all')"
+          class="sport-tab active-tab bg-blue-900 text-white px-5 py-2 rounded-full font-bold text-sm"
+          data-tag="all">All Events</button>
+        <button onclick="loadEventsByTag('Cricket')"
+          class="sport-tab bg-gray-100 text-gray-700 px-5 py-2 rounded-full font-bold text-sm hover:bg-blue-100"
+          data-tag="Cricket">Cricket</button>
+        <button onclick="loadEventsByTag('Football')"
+          class="sport-tab bg-gray-100 text-gray-700 px-5 py-2 rounded-full font-bold text-sm hover:bg-blue-100"
+          data-tag="Football">Football</button>
+        <button onclick="loadEventsByTag('Kabaddi')"
+          class="sport-tab bg-gray-100 text-gray-700 px-5 py-2 rounded-full font-bold text-sm hover:bg-blue-100"
+          data-tag="Kabaddi">Kabaddi</button>
+        <button onclick="loadEventsByTag('Track & Field')"
+          class="sport-tab bg-gray-100 text-gray-700 px-5 py-2 rounded-full font-bold text-sm hover:bg-blue-100"
+          data-tag="Track & Field">Track & Field</button>
+        <button onclick="loadEventsByTag('Marathon')"
+          class="sport-tab bg-gray-100 text-gray-700 px-5 py-2 rounded-full font-bold text-sm hover:bg-blue-100"
+          data-tag="Marathon">Marathon</button>
+      </div>
+
+      <div id="athleteEventsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Populated by JS -->
+      </div>
+      <div id="athleteNoEvents" class="hidden py-20 text-center">
+        <div class="text-6xl mb-4">📭</div>
+        <p class="text-2xl font-black text-gray-300 uppercase italic">No events found</p>
+        <p class="text-gray-400 mt-2">Check back soon – officials are posting events!</p>
+      </div>
+
+      <div class="mt-12 text-center">
+        <button onclick="window.location.reload()"
+          class="text-blue-900 font-bold uppercase tracking-widest hover:text-yellow-500 transition-colors">&#8592; Back
+          to Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sports Section (public, pre-login) -->
+  <section id="register" class="relative-section py-20 px-6 bg-white">
+    <div class="moving-bg-container">
+      <img src="https://images.unsplash.com/photo-1531415074968-036ba1b565da?auto=format&fit=crop&w=800&q=60"
+        alt="bg1" />
+      <img src="https://images.unsplash.com/photo-1628771065518-0d82f1938462?auto=format&fit=crop&w=800&q=60"
+        alt="bg2" />
+      <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=60"
+        alt="bg3" />
+      <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=60"
+        alt="bg4" />
+      <img src="https://images.unsplash.com/photo-1531415074968-036ba1b565da?auto=format&fit=crop&w=800&q=60"
+        alt="bg1" />
+      <img src="https://images.unsplash.com/photo-1628771065518-0d82f1938462?auto=format&fit=crop&w=800&q=60"
+        alt="bg2" />
+      <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=60"
+        alt="bg3" />
+      <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=60"
+        alt="bg4" />
+    </div>
+    <div class="container mx-auto relative z-10">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-black text-blue-900 uppercase tracking-tighter">Select Your Discipline</h2>
+        <div class="h-1.5 w-32 bg-yellow-500 mx-auto mt-4"></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="sport-card bg-white rounded-2xl overflow-hidden group border border-gray-200 shadow-md hover:shadow-2xl hover:border-yellow-500 transition duration-500">
+          <div class="h-56 overflow-hidden"><img src="./assets/cricket.png" alt="Cricket"
+              class="w-full h-full object-cover transition duration-700" /></div>
+          <div class="p-8 text-center bg-white">
+            <h3 class="text-2xl font-black text-blue-900 italic group-hover:text-yellow-600 transition">CRICKET</h3>
+          </div>
+        </div>
+        <div class="sport-card bg-white rounded-2xl overflow-hidden group border border-gray-200 shadow-md hover:shadow-2xl hover:border-yellow-500 transition duration-500">
+          <div class="h-56 overflow-hidden"><img src="./assets/image.png" alt="Kabaddi"
+              class="w-full h-full object-cover transition duration-700" /></div>
+          <div class="p-8 text-center bg-white">
+            <h3 class="text-2xl font-black text-blue-900 italic group-hover:text-yellow-600 transition">KABADDI</h3>
+          </div>
+        </div>
+        <div class="sport-card bg-white rounded-2xl overflow-hidden group border border-gray-200 shadow-md hover:shadow-2xl hover:border-yellow-500 transition duration-500">
+          <div class="h-56 overflow-hidden"><img src="./assets/ronaldo.png" alt="Football"
+              class="w-full h-full object-cover transition duration-700" /></div>
+          <div class="p-8 text-center bg-white">
+            <h3 class="text-2xl font-black text-blue-900 italic group-hover:text-yellow-600 transition">FOOTBALL</h3>
+          </div>
+        </div>
+        <div class="sport-card bg-white rounded-2xl overflow-hidden group border border-gray-200 shadow-md hover:shadow-2xl hover:border-yellow-500 transition duration-500">
+          <div class="h-56 overflow-hidden"><img src="./assets/athletics.png" alt="Athletics"
+              class="w-full h-full object-cover transition duration-700" /></div>
+          <div class="p-8 text-center bg-white">
+            <h3 class="text-2xl font-black text-blue-900 italic group-hover:text-yellow-600 transition">TRACK &amp;
+              FIELD</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-12 px-6 border-t border-gray-800">
+    <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
+      <div>
+        <h4 class="text-2xl font-black italic mb-4">PROSPORTS</h4>
+        <p class="text-gray-400">Leading the digital revolution in sports registration.</p>
+      </div>
+      <div>
+        <h4 class="font-bold mb-4 uppercase text-yellow-500">Help Desk</h4>
+        <p class="text-gray-400">Support: support@prosports.com</p>
+      </div>
+      <div>
+        <h4 class="font-bold mb-4 uppercase text-yellow-500">Follow Us</h4>
+        <div class="flex justify-center md:justify-start space-x-6 text-2xl">
+          <a href="#" onclick="openUserDashboard()"
+            class="hover:text-yellow-600 transition-colors uppercase text-base">Dashboard</a>
+          <a href="#" class="hover:text-yellow-500 transition"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="hover:text-yellow-500 transition"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════
+     AUTH MODAL (Role → Email → Login/Register)
+════════════════════════════════════════ -->
+  <div id="authModal"
+    class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-blue-900/40 backdrop-blur-md">
+    <div
+      class="bg-white rounded-3xl p-0 max-w-lg w-full mx-4 shadow-2xl relative overflow-hidden border border-white/20">
+      <div class="bg-blue-900 p-6 text-white relative">
+        <button id="closeModal"
+          class="absolute top-4 right-4 text-white/50 hover:text-white text-2xl transition-colors">&times;</button>
+        <h2 class="text-3xl font-black italic uppercase tracking-tighter">Pro<span class="text-yellow-500">Sports</span>
+        </h2>
+        <p class="text-blue-200 text-sm font-bold uppercase tracking-widest" id="modalSubTitle">Official Portal</p>
+      </div>
+      <div class="p-8">
+        <!-- Step 1: Role -->
+        <div id="step1">
+          <p class="text-gray-500 font-bold mb-6 uppercase text-xs tracking-widest text-center">Select your category to
+            proceed</p>
+          <div class="grid grid-cols-2 gap-4">
+            <button onclick="showDetailsForm('Athlete')"
+              class="flex flex-col items-center justify-center p-6 border-2 border-gray-100 rounded-2xl hover:border-blue-900 hover:bg-blue-50 transition-all group">
+              <div
+                class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-900 mb-4 group-hover:bg-blue-900 group-hover:text-white transition-all">
+                <i class="fas fa-running text-2xl"></i>
+              </div>
+              <span class="font-black text-blue-900 uppercase">Athlete</span>
+            </button>
+            <button onclick="showDetailsForm('Official')"
+              class="flex flex-col items-center justify-center p-6 border-2 border-gray-100 rounded-2xl hover:border-yellow-500 hover:bg-yellow-50 transition-all group">
+              <div
+                class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600 mb-4 group-hover:bg-yellow-500 group-hover:text-white transition-all">
+                <i class="fas fa-clipboard-check text-2xl"></i>
+              </div>
+              <span class="font-black text-blue-900 uppercase">Official</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: Email -->
+        <div id="step2" class="hidden">
+          <h2 id="formTitle" class="text-2xl font-black text-blue-900 mb-1 uppercase italic">Enter Your Email</h2>
+          <p class="text-gray-400 text-sm font-semibold mb-5">We'll check if you already have an account.</p>
+          <div class="space-y-4">
+            <div class="relative">
+              <i class="fas fa-envelope absolute left-4 top-4 text-gray-400"></i>
+              <input type="email" id="uEmail" placeholder="Email Address"
+                class="w-full pl-12 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition-all" />
+            </div>
+            <button id="emailCheckBtn"
+              class="w-full bg-blue-900 text-white p-4 rounded-xl font-black uppercase tracking-widest hover:bg-yellow-500 hover:text-blue-900 shadow-lg transition-all">
+              Continue <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+            <button onclick="resetModal()"
+              class="w-full text-center text-sm font-bold text-gray-400 hover:text-blue-900 uppercase tracking-tighter transition-colors mt-2">&#8592;
+              Wrong category? Go Back</button>
+          </div>
+        </div>
+
+        <!-- Step 3a: Returning user -->
+        <div id="step3login" class="hidden">
+          <div class="text-center mb-6">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"><i
+                class="fas fa-user-check text-3xl text-green-600"></i></div>
+            <h2 class="text-2xl font-black text-blue-900 uppercase italic">Welcome Back!</h2>
+            <p id="loginWelcomeMsg" class="text-gray-500 font-semibold mt-1 text-sm"></p>
+            <div
+              class="mt-3 inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs font-bold px-4 py-2 rounded-full">
+              <i class="fas fa-shield-alt"></i><span id="loginIdTypeBadge">Verified Account</span>
+            </div>
+          </div>
+          <button id="loginConfirmBtn"
+            class="w-full bg-blue-900 text-white p-4 rounded-xl font-black uppercase tracking-widest hover:bg-yellow-500 hover:text-blue-900 shadow-lg transition-all">
+            <i class="fas fa-sign-in-alt mr-2"></i> Login Now
+          </button>
+          <button onclick="goToStep2()"
+            class="w-full text-center text-sm font-bold text-gray-400 hover:text-blue-900 uppercase tracking-tighter transition-colors mt-3">&#8592;
+            Use a different email</button>
+        </div>
+
+        <!-- Step 3b: New user registration -->
+        <div id="step3register" class="hidden">
+          <h2 id="regFormTitle" class="text-2xl font-black text-blue-900 mb-1 uppercase italic">New Registration</h2>
+          <p class="text-gray-400 text-sm font-semibold mb-5">Fill in your details to create your account.</p>
+          <div class="space-y-4">
+            <div class="relative">
+              <i class="fas fa-user absolute left-4 top-4 text-gray-400"></i>
+              <input type="text" id="fullName" placeholder="Full Name"
+                class="w-full pl-12 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition-all" />
+            </div>
+            <div class="relative">
+              <i class="fas fa-envelope absolute left-4 top-4 text-green-500"></i>
+              <input type="email" id="uEmailDisplay" readonly
+                class="w-full pl-12 p-3 bg-green-50 border border-green-300 rounded-xl outline-none font-bold text-gray-600 cursor-not-allowed" />
+              <span class="absolute right-4 top-4 text-green-500 text-xs font-bold">&#10003; Verified</span>
+            </div>
+            <div class="relative">
+              <i class="fas fa-id-card absolute left-4 top-4 text-gray-400"></i>
+              <input type="text" id="uIdNumber" placeholder="Aadhaar (12 digits) or Passport (e.g. A1234567)"
+                class="w-full pl-12 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition-all" />
+            </div>
+            <button id="finalSubmit"
+              class="w-full bg-blue-900 text-white p-4 rounded-xl font-black uppercase tracking-widest hover:bg-yellow-500 hover:text-blue-900 shadow-lg hover:shadow-yellow-500/20 transition-all">
+              Verify &amp; Complete <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+            <button onclick="goToStep2()"
+              class="w-full text-center text-sm font-bold text-gray-400 hover:text-blue-900 uppercase tracking-tighter transition-colors mt-2">&#8592;
+              Use a different email</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+     CREATE EVENT MODAL (Officials only)
+════════════════════════════════════════ -->
+  <div id="createEventModal"
+    class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-blue-900/50 backdrop-blur-md">
+    <div
+      class="bg-white rounded-3xl p-0 max-w-2xl w-full mx-4 shadow-2xl relative overflow-hidden border border-white/20">
+
+      <!-- Header -->
+      <div class="bg-blue-900 p-6 text-white relative flex items-center gap-4">
+        <div class="w-12 h-12 bg-yellow-500 rounded-xl flex items-center justify-center">
+          <i class="fas fa-calendar-plus text-blue-900 text-xl"></i>
+        </div>
+        <div>
+          <h2 id="modalEventPostingTitle" class="text-2xl font-black italic uppercase tracking-tighter">CREATE EVENT
+          </h2>
+          <p class="text-blue-200 text-xs font-bold uppercase tracking-widest">Official Event Posting</p>
+        </div>
+        <button onclick="closeCreateEventModal()"
+          class="absolute top-4 right-4 text-white/50 hover:text-white text-2xl transition-colors">&times;</button>
+      </div>
+
+      <!-- Scrollable Form Body -->
+      <div class="modal-body p-8">
+        <form id="createEventForm" enctype="multipart/form-data">
+          <input type="hidden" id="evtType" value="Sports" />
+
+          <!-- Event Name -->
+          <div class="mb-5">
+            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Event Name *</label>
+            <div class="relative">
+              <i class="fas fa-trophy absolute left-4 top-3.5 text-gray-400"></i>
+              <input type="text" id="evtName" placeholder="e.g. Inter-District Cricket Championship" required
+                class="w-full pl-12 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition-all font-semibold" />
+            </div>
+          </div>
+
+          <!-- Sport Type -->
+          <div class="mb-5">
+            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Sport *</label>
+            <select id="evtSport" required
+              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none font-bold text-gray-700 appearance-none">
+              <!-- Dynamically populated by JS based on whether Marathon or Sports mode -->
+            </select>
+          </div>
+
+          <!-- Date + Category row -->
+          <div class="grid grid-cols-2 gap-4 mb-5">
+            <div>
+              <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Event Date *</label>
+              <div class="relative">
+                <i class="fas fa-calendar-alt absolute left-4 top-3.5 text-gray-400"></i>
+                <input type="date" id="evtDate" required min=""
+                  class="w-full pl-12 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none font-bold" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Age Category
+                *</label>
+              <select id="evtCategory" required
+                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none font-bold text-gray-700 appearance-none">
+                <option value="" disabled selected>Select Category</option>
+                <option value="Under 18">Under 18</option>
+                <option value="Above 18">Above 18</option>
+                <option value="Both">Both (Open)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Venue Name -->
+          <div class="mb-5">
+            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Venue Name *</label>
+            <div class="relative">
+              <i class="fas fa-map-marker-alt absolute left-4 top-3.5 text-gray-400"></i>
+              <input type="text" id="evtVenue" placeholder="e.g. Nehru Stadium, Chennai" required
+                class="w-full pl-12 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition-all font-semibold" />
+            </div>
+          </div>
+
+          <!-- Google Maps Link -->
+          <div class="mb-5">
+            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
+              Google Maps Link <span class="text-gray-400 normal-case font-normal">(paste from Google Maps)</span>
+            </label>
+            <div class="relative">
+              <i class="fab fa-google absolute left-4 top-3.5 text-red-400"></i>
+              <input type="url" id="evtMaps" placeholder="https://maps.google.com/..."
+                class="w-full pl-12 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition-all font-semibold text-sm" />
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Open Google Maps → Share → Copy link → Paste here</p>
+          </div>
+
+          <!-- PDF Upload -->
+          <div class="mb-6">
+            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
+              Registration Form <span class="text-gray-400 normal-case font-normal">(PDF, max 10 MB)</span>
+            </label>
+            <label id="pdfDropZone"
+              class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer hover:border-blue-900 hover:bg-blue-50 transition-all group">
+              <i class="fas fa-file-pdf text-3xl text-gray-300 group-hover:text-blue-900 mb-2 transition-all"></i>
+              <p id="pdfLabel" class="text-sm font-bold text-gray-400 group-hover:text-blue-900">Click to upload PDF
+                form</p>
+              <p class="text-xs text-gray-300">Athletes will be able to download this form</p>
+              <input type="file" id="evtPdf" accept=".pdf" class="hidden" onchange="handlePdfSelect(this)" />
+            </label>
+          </div>
+
+          <!-- Submit -->
+          <button type="button" onclick="submitCreateEvent()"
+            class="w-full bg-blue-900 text-white p-4 rounded-xl font-black uppercase tracking-widest hover:bg-yellow-500 hover:text-blue-900 shadow-lg transition-all flex items-center justify-center gap-3">
+            <i class="fas fa-upload"></i> Publish Event
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Upload Filled Form Modal (Athlete) -->
+  <div id="uploadFormModal"
+    class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-blue-900/50 backdrop-blur-sm px-4">
+    <div class="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl relative">
+      <button onclick="closeUploadFormModal()"
+        class="absolute top-5 right-5 z-50 w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-yellow-500 hover:text-blue-900 text-white rounded-full transition-all border border-white/20">
+        <i class="fas fa-times text-xl"></i>
+      </button>
+      <div class="bg-blue-900 p-6 text-center text-white relative">
+        <h2 class="text-2xl font-black italic uppercase">Register</h2>
+        <p id="uploadEventName" class="text-sm text-yellow-500 font-bold mt-1"></p>
+      </div>
+      <div class="p-6">
+        <form id="uploadRegForm" onsubmit="event.preventDefault()">
+          <input type="hidden" id="regEventId" />
+          <div class="mb-6">
+            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
+              Upload Your Form <span class="text-gray-400 normal-case font-normal">(PDF, max 10 MB) *</span>
+            </label>
+            <label
+              class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer hover:border-blue-900 hover:bg-blue-50 transition-all group">
+              <i class="fas fa-file-pdf text-3xl text-gray-300 group-hover:text-blue-900 mb-2 transition-all"></i>
+              <p id="regPdfLabel" class="text-sm font-bold text-gray-400 group-hover:text-blue-900 px-4 text-center">
+                Click to upload PDF</p>
+              <input type="file" id="regFilledPdf" accept=".pdf" class="hidden" onchange="handleRegPdfSelect(this)" />
+            </label>
+          </div>
+          <button type="button" onclick="submitEventRegistration()"
+            class="w-full bg-blue-900 text-white p-4 rounded-xl font-black uppercase tracking-widest hover:bg-yellow-500 hover:text-blue-900 shadow-lg transition-all flex items-center justify-center gap-3">
+            <i class="fas fa-check-circle"></i> Complete Registration
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Registrations Modal (Official) -->
+  <div id="viewRegsModal"
+    class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-blue-900/50 backdrop-blur-sm px-4">
+    <div class="bg-white w-full max-w-3xl rounded-3xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]">
+      <button onclick="closeViewRegsModal()"
+        class="absolute top-4 right-5 text-gray-400 hover:text-white z-10 font-bold text-xl">&times;</button>
+      <div class="bg-blue-900 p-6 text-white shrink-0 relative">
+        <h2 class="text-2xl font-black italic uppercase">Participant List</h2>
+        <p id="viewRegsEventName" class="text-sm text-yellow-500 font-bold mt-1"></p>
+      </div>
+      <div class="p-6 overflow-y-auto flex-1 bg-gray-50">
+        <div id="regsListContainer" class="space-y-4">
+          <!-- populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js" defer></script>
+  <script>
+    (function () {
+      if (!window.chatbase || window.chatbase("getState") !== "initialized") {
+        window.chatbase = (...arguments) => {
+          if (!window.chatbase.q) { window.chatbase.q = [] }
+          window.chatbase.q.push(arguments)
+        };
+        window.chatbase = new Proxy(window.chatbase, {
+          get(target, prop) {
+            if (prop === "q") { return target.q }
+            return (...args) => target(prop, ...args)
+          }
+        })
+      }
+      const onLoad = function () {
+        const script = document.createElement("script");
+        script.src = "https://www.chatbase.co/embed.min.js";
+        script.id = "snaWlIneg_U2zlLSul9KJ";
+        script.domain = "www.chatbase.co";
+        document.body.appendChild(script)
+      };
+      if (document.readyState === "complete") { onLoad() }
+      else { window.addEventListener("load", onLoad) }
+    })();
+  </script>
+</body>
+
+</html>
